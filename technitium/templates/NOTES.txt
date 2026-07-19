@@ -1,0 +1,27 @@
+Technitium DNS Server has been deployed.
+
+1. Get the external IP assigned by your LoadBalancer (e.g. MetalLB) — it may
+   take a few moments to appear:
+
+    kubectl get svc -n {{ .Release.Namespace }} -w {{ include "technitium.fullname" . }}
+
+    export SERVICE_IP=$(kubectl get svc -n {{ .Release.Namespace }} {{ include "technitium.fullname" . }} -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+
+2. Point your router / DHCP server's DNS setting at $SERVICE_IP (port 53,
+   UDP and TCP).
+
+3. Manage the server via the web console:
+
+    echo "http://$SERVICE_IP:{{ .Values.service.httpPort }}"
+
+{{- if not .Values.admin.existingSecret.name }}
+
+NOTE: No admin.existingSecret was configured, so no admin password was set
+on first boot. Visit the web console above to complete Technitium's first-run
+setup wizard.
+{{- else }}
+
+NOTE: The admin password was only applied on the DNS server's very first
+startup. Changing the referenced Secret after that has no effect — rotate
+the password from the web console instead.
+{{- end }}
