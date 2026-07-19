@@ -1,0 +1,120 @@
+# Default values for technitium.
+# This chart deploys a single Technitium DNS Server instance (not scaled out —
+# its config/zones/blocklists live on one PersistentVolumeClaim, and Technitium
+# has no built-in mechanism to replicate that state across instances).
+
+image:
+  repository: technitium/dns-server
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+
+# DNS server identity/behavior. These are only applied by Technitium on its
+# very first startup (i.e. when /etc/dns is empty) — see DNS_SERVER_* in
+# https://github.com/TechnitiumSoftware/DnsServer/blob/master/DockerEnvironmentVariables.md
+config:
+  # The FQDN this DNS server identifies itself as. Defaults to the chart's
+  # fullname if left empty.
+  domain: ""
+  # Upstream forwarders to use instead of root-hint recursion, e.g.:
+  #   forwarders: ["1.1.1.1", "9.9.9.9"]
+  forwarders: []
+
+# Admin web console password. Only read by Technitium on first startup;
+# changing this after the config volume has been initialized has no effect —
+# rotate the password from the web UI instead. If left unset, Technitium's
+# own first-run setup wizard will prompt for a password on first web UI visit.
+admin:
+  existingSecret:
+    # Name of a pre-existing Secret containing the admin password.
+    name: ""
+    # Key within that Secret holding the plaintext password.
+    key: "password"
+
+# Config, zones, blocklist cache and logs all live under /etc/dns and are
+# persisted on this single PVC. Requires ReadWriteOnce since there is only
+# ever one pod.
+persistence:
+  enabled: true
+  # Leave empty to use the cluster's default StorageClass.
+  storageClassName: ""
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+# One Service fronts both plain DNS and the web console so the router (DNS)
+# and the browser (web UI) can both target a single stable IP.
+service:
+  # LoadBalancer requires a provisioner such as MetalLB on bare-metal clusters.
+  type: LoadBalancer
+  # Pin to a fixed IP from your MetalLB pool so the router's DNS entry never
+  # has to change across reinstalls, e.g. "192.168.1.53".
+  loadBalancerIP: ""
+  # Escape hatch for e.g. MetalLB IP-pool-selection annotations.
+  annotations: {}
+  dnsPort: 53
+  httpPort: 5380
+
+# This is for setting Kubernetes Annotations to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations: {}
+# This is for setting Kubernetes Labels to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+  # - name: foo
+  #   secret:
+  #     secretName: mysecret
+  #     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+  # - name: foo
+  #   mountPath: "/etc/foo"
+  #   readOnly: true
+
+imagePullSecrets: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
