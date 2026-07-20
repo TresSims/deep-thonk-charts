@@ -48,7 +48,7 @@ spec:
               containerPort: 8080
               protocol: TCP
           env:
-            - name: TECHNITIUM_API_BASE_URL
+            - name: TECHNITIUM_API_DNS_BASE_URL
               value: "http://localhost:{{ $.Values.service.httpPort }}"
             - name: TECHNITIUM_API_DNS_TOKEN
               valueFrom:
