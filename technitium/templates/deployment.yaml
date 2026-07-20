@@ -49,7 +49,7 @@ spec:
               protocol: TCP
           env:
             - name: TECHNITIUM_API_BASE_URL
-              value: NOT sure!
+              value: "http://localhost:{{ $.Values.service.httpPort }}"
             - name: TECHNITIUM_API_DNS_TOKEN
               valueFrom:
                 secretKeyRef:
