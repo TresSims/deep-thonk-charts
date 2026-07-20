@@ -36,6 +36,29 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.metrics.enabled }}
+      {{- with .Values.metrics }}
+      initContainers:
+        - name: metrics-exporter
+          image: {{ .image }}
+          imagePullPolicy: {{.Values.metrics.image}}
+          restartPolicy: Always
+          ports:
+            - name: metrics
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: TECHNITIUM_API_BASE_URL
+              value: NOT sure!
+            - name: TECHNITIUM_API_DNS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .credentials.secretRef.name }}
+                  key: {{ .credentials.secretRef.key }}
+            - name: TECHNITIUM_API_DNS_LABEL
+              value: dns
+      {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}

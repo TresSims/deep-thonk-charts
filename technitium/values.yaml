@@ -118,3 +118,13 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+metrics:
+  enabled: false
+  image:
+    repository: ghcr.io/brioche-works/technitium-dns-prometheus-exporter:master
+    pullPolicy: IfNotPresent
+  credentials:
+    secretRef:
+      name: technitium-api-key
+      key: api-key
