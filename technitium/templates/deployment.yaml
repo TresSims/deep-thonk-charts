@@ -40,8 +40,8 @@ spec:
       {{- with .Values.metrics }}
       initContainers:
         - name: metrics-exporter
-          image: {{ .image }}
-          imagePullPolicy: {{.Values.metrics.image}}
+          image: {{ .image.name }}
+          imagePullPolicy: {{ .image.pullPolicy }}
           restartPolicy: Always
           ports:
             - name: metrics
