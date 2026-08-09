@@ -1,7 +1,7 @@
 ---
 apiVersion: v2
 name: foundryvtt
-description: A Helm chart for foundryvtt
+description: An unofficial Helm chart for foundryvtt
 
 # A chart can be either an 'application' or a 'library' chart.
 #
