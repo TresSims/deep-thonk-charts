@@ -2,7 +2,7 @@
 # This chart deploys a single Technitium DNS Server instance (not scaled out —
 # its config/zones/blocklists live on one PersistentVolumeClaim, and Technitium
 # has no built-in mechanism to replicate that state across instances).
-
+---
 image:
   repository: technitium/dns-server
   pullPolicy: IfNotPresent
